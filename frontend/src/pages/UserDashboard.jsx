@@ -356,3 +356,202 @@ export default function UserDashboard({ user, logout }) {
                     {pt.mbps}
                   </div>
                   <div
+                    style={{
+                      height: `${barHeight}px`,
+                      background: 'linear-gradient(180deg, #10b981 0%, #2563eb 100%)',
+                      borderRadius: '6px 6px 0 0',
+                      transition: 'height 0.25s ease'
+                    }}
+                  />
+                  <div style={{ fontSize: '12px', color: '#475569', marginTop: '6px', fontWeight: 'bold' }}>
+                    {pt.step}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* AI Problem Predictor with Pre-built ONU Light & Network Options */}
+      <div style={{ marginTop: '30px', padding: '25px', border: '1px solid #cbd5e1', borderRadius: '10px', background: '#f8fafc' }}>
+        <h3 style={{ marginTop: 0 }}>AI Network Troubleshooter</h3>
+
+        <p style={{ color: '#1e293b', fontWeight: 'bold', fontSize: '14px', marginBottom: '8px' }}>
+          ১. ONU / Router-এর বাতিগুলো কী অবস্থায় আছে তা সিলেক্ট করুন:
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+          {ONU_LIGHT_OPTIONS.map((item) => {
+            const active = selectedOptions.some((p) => p.id === item.id);
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => toggleOption(item)}
+                style={{
+                  padding: '8px 13px',
+                  borderRadius: '20px',
+                  border: active ? '2px solid #2563eb' : '1px solid #cbd5e1',
+                  background: active ? '#dbeafe' : '#fff',
+                  color: active ? '#1e40af' : '#334155',
+                  fontWeight: active ? 'bold' : 'normal',
+                  fontSize: '13px',
+                  cursor: 'pointer'
+                }}
+              >
+                {active ? '✓ ' : ''}{item.label}
+              </button>
+            );
+          })}
+        </div>
+
+        <p style={{ color: '#1e293b', fontWeight: 'bold', fontSize: '14px', marginBottom: '8px' }}>
+          ২. ইন্টারনেটে কী সমস্যা হচ্ছে তা সিলেক্ট করুন:
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '18px' }}>
+          {INTERNET_PROBLEM_OPTIONS.map((item) => {
+            const active = selectedOptions.some((p) => p.id === item.id);
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => toggleOption(item)}
+                style={{
+                  padding: '8px 13px',
+                  borderRadius: '20px',
+                  border: active ? '2px solid #059669' : '1px solid #cbd5e1',
+                  background: active ? '#d1fae5' : '#fff',
+                  color: active ? '#065f46' : '#334155',
+                  fontWeight: active ? 'bold' : 'normal',
+                  fontSize: '13px',
+                  cursor: 'pointer'
+                }}
+              >
+                {active ? '✓ ' : ''}{item.label}
+              </button>
+            );
+          })}
+        </div>
+
+        <form onSubmit={handleAskAI} style={{ display: 'flex', gap: '10px' }}>
+          <input
+            type="text"
+            placeholder="অপশন সিলেক্ট করলেই যথেষ্ট; চাইলে এখানে বাড়তি কিছু লিখতে পারেন (ঐচ্ছিক)"
+            value={problem}
+            onChange={(e) => setProblem(e.target.value)}
+            style={{ flex: 1, padding: '12px', borderRadius: '6px', border: '1px solid #94a3b8', background: '#fff' }}
+          />
+          <button
+            type="submit"
+            disabled={loadingAI}
+            style={{ padding: '12px 22px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            {loadingAI ? 'Analyzing...' : 'AI Predict & Solve'}
+          </button>
+        </form>
+
+        {aiResult && (
+          <div style={{ marginTop: '20px', padding: '16px', background: '#fff', borderLeft: '4px solid #2563eb', borderRadius: '6px' }}>
+            <h4 style={{ margin: '0 0 8px 0', color: '#1e40af' }}>AI Diagnosis: {aiResult.prediction}</h4>
+            <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'sans-serif', lineHeight: '1.6', color: '#334155' }}>
+              {aiResult.solution}
+            </pre>
+            <button
+              type="button"
+              onClick={openTicketDraft}
+              style={{ marginTop: '10px', padding: '10px 16px', background: '#f59e0b', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
+            >
+              Complain Ticket তৈরি করুন
+            </button>
+          </div>
+        )}
+
+        {showTicketForm && (
+          <form
+            onSubmit={handleSendTicketToTechnician}
+            style={{ marginTop: '20px', padding: '20px', background: '#fffbeb', border: '1px solid #fcd34d', borderRadius: '8px' }}
+          >
+            <h4 style={{ margin: '0 0 12px 0', color: '#92400e' }}>Complain Ticket Details</h4>
+
+            <div style={{ fontSize: '14px', lineHeight: '1.7', color: '#1e293b', background: '#fff', padding: '12px', borderRadius: '6px', marginBottom: '14px', border: '1px solid #fde68a' }}>
+              <div><strong>Ticket Number:</strong> {draftTicketNo}</div>
+              <div><strong>User Name:</strong> {currentUser.name}</div>
+              <div><strong>User ID:</strong> {currentUser.id}</div>
+              <div><strong>Package:</strong> {currentUser.package}</div>
+              <div><strong>Selected Status & Issue:</strong> {getIssueSummary()}</div>
+            </div>
+
+            <div style={{ marginBottom: '14px' }}>
+              <label style={{ display: 'block', fontWeight: 'bold', fontSize: '14px', marginBottom: '6px', color: '#1e293b' }}>
+                আপনার লোকেশন লিখুন (এলাকা, রোড, বাড়ি/ফ্ল্যাট নম্বর): *
+              </label>
+              <input
+                type="text"
+                placeholder="যেমন: আশুলিয়া / সাভার, রোড-৪, বাড়ি-১২, ফ্ল্যাট-৩বি"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                required
+                style={{ width: '100%', padding: '11px', boxSizing: 'border-box', borderRadius: '6px', border: '1px solid #d97706', background: '#fff' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                type="submit"
+                style={{ padding: '11px 20px', background: '#16a34a', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
+              >
+                Send Ticket to Technician
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowTicketForm(false)}
+                style={{ padding: '11px 16px', background: '#e2e8f0', color: '#334155', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
+
+        {ticketMsg && (
+          <p style={{ color: '#15803d', fontWeight: 'bold', marginTop: '14px', background: '#dcfce7', padding: '10px', borderRadius: '6px' }}>
+            ✓ {ticketMsg}
+          </p>
+        )}
+      </div>
+
+      {/* User's Previous Tickets */}
+      <div style={{ marginTop: '30px' }}>
+        <h3>My Complain Tickets</h3>
+        {myTickets.length === 0 ? (
+          <p style={{ color: '#64748b', fontSize: '14px' }}>আপনার কোনো কমপ্লেইন টিকেট নেই।</p>
+        ) : (
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ background: '#f1f5f9', textAlign: 'left' }}>
+                <th style={{ padding: '10px', border: '1px solid #ddd' }}>Ticket No</th>
+                <th style={{ padding: '10px', border: '1px solid #ddd' }}>Issue</th>
+                <th style={{ padding: '10px', border: '1px solid #ddd' }}>Location</th>
+                <th style={{ padding: '10px', border: '1px solid #ddd' }}>Date</th>
+                <th style={{ padding: '10px', border: '1px solid #ddd' }}>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {myTickets.map((t) => (
+                <tr key={t.id}>
+                  <td style={{ padding: '10px', border: '1px solid #ddd' }}>{t.id}</td>
+                  <td style={{ padding: '10px', border: '1px solid #ddd' }}>{t.issue}</td>
+                  <td style={{ padding: '10px', border: '1px solid #ddd' }}>{t.location}</td>
+                  <td style={{ padding: '10px', border: '1px solid #ddd' }}>{t.date}</td>
+                  <td style={{ padding: '10px', border: '1px solid #ddd', fontWeight: 'bold', color: t.status === 'Pending' ? '#d97706' : '#059669' }}>
+                    {t.status}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
