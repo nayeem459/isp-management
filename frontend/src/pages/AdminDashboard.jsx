@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const fallbackStats = {
   totalUsers: 2,
   monthlyRevenue: '1,800 BDT',
@@ -53,7 +55,7 @@ export default function AdminDashboard({ user, logout }) {
 
   const fetchData = async () => {
     try {
-      const statRes = await axios.get('http://localhost:5000/api/admin/stats', { timeout: 4000 });
+      const statRes = await axios.get(`${API_BASE_URL}/api/admin/stats`, { timeout: 4000 });
       if (statRes && statRes.data) {
         setStats({
           ...fallbackStats,
@@ -71,7 +73,7 @@ export default function AdminDashboard({ user, logout }) {
     }
 
     try {
-      const ticketRes = await axios.get('http://localhost:5000/api/tickets', { timeout: 4000 });
+      const ticketRes = await axios.get(`${API_BASE_URL}/api/tickets`, { timeout: 4000 });
       setTickets(Array.isArray(ticketRes.data) ? ticketRes.data : []);
     } catch (err) {
       console.error('Error fetching tickets:', err);
@@ -86,7 +88,7 @@ export default function AdminDashboard({ user, logout }) {
     e.preventDefault();
     setAddCustomerMsg('');
     try {
-      const res = await axios.post('http://localhost:5000/api/customers', {
+      const res = await axios.post(`${API_BASE_URL}/api/customers`, {
         id: newId,
         password: newPassword,
         name: newName,
@@ -95,7 +97,7 @@ export default function AdminDashboard({ user, logout }) {
         billStatus: newBillStatus,
         expireDate: newExpire
       });
-      setAddCustomerMsg(res.data.message || 'কাস্টমার যুক্ত হয়েছে');
+      setAddCustomerMsg(res.data.message || 'কাস্টমার যুক্ত হয়েছে');
       setNewId('');
       setNewName('');
       fetchData();
@@ -111,8 +113,8 @@ export default function AdminDashboard({ user, logout }) {
     formData.append('file', csvFile);
 
     try {
-      const res = await axios.post('http://localhost:5000/api/customers/import-csv', formData);
-      setUploadMsg(res.data.message || 'CSV সিঙ্ক সফল হয়েছে');
+      const res = await axios.post(`${API_BASE_URL}/api/customers/import-csv`, formData);
+      setUploadMsg(res.data.message || 'CSV সিঙ্ক সফল হয়েছে');
       setCsvFile(null);
       fetchData();
     } catch (err) {
@@ -124,7 +126,7 @@ export default function AdminDashboard({ user, logout }) {
     const nextStatus = customer.bill_status === 'Paid' ? 'Unpaid' : 'Paid';
     const nextExpireDate = nextStatus === 'Paid' ? '2026-12-21' : customer.expire_date;
     try {
-      await axios.put(`http://localhost:5000/api/customers/${customer.id}/bill`, {
+      await axios.put(`${API_BASE_URL}/api/customers/${customer.id}/bill`, {
         billStatus: nextStatus,
         expireDate: nextExpireDate
       });

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export default function Login({ setAuth }) {
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
@@ -13,7 +15,7 @@ export default function Login({ setAuth }) {
     setLoading(true);
 
     try {
-      const res = await axios.post('http://localhost:5000/api/login', {
+      const res = await axios.post(`${API_BASE_URL}/api/login`, {
         id: id.trim(),
         password
       });
@@ -22,7 +24,7 @@ export default function Login({ setAuth }) {
       localStorage.setItem('ispUser', JSON.stringify(loggedInUser));
       setAuth(loggedInUser);
     } catch (err) {
-      setError(err.response?.data?.message || 'লগইন করা যায়নি। সঠিক ID এবং Password দিন।');
+      setError(err.response?.data?.message || 'লগইন করা যায়নি। সঠিক ID এবং Password দিন।');
     } finally {
       setLoading(false);
     }
@@ -32,7 +34,7 @@ export default function Login({ setAuth }) {
     <div style={{ maxWidth: '420px', margin: '75px auto', padding: '30px', border: '1px solid #e2e8f0', borderRadius: '12px', fontFamily: 'sans-serif', boxShadow: '0 6px 18px rgba(0,0,0,0.06)', background: '#fff' }}>
       <h2 style={{ textAlign: 'center', color: '#1e40af', margin: '0 0 6px 0' }}>ISP Management System</h2>
       <p style={{ textAlign: 'center', color: '#64748b', fontSize: '14px', margin: '0 0 22px 0' }}>
-        আপনার ID এবং Password দিয়ে লগইন করুন
+        আপনার ID এবং Password দিয়ে লগইন করুন
       </p>
 
       {error && (
@@ -62,7 +64,7 @@ export default function Login({ setAuth }) {
           </label>
           <input
             type="password"
-            placeholder="আপনার পাসওয়ার্ড দিন"
+            placeholder="আপনার পাসওয়ার্ড দিন"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required

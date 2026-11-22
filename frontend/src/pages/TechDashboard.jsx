@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export default function TechDashboard({ user, logout }) {
   const [tickets, setTickets] = useState([]);
   const [filter, setFilter] = useState('Pending');
@@ -28,7 +30,7 @@ export default function TechDashboard({ user, logout }) {
 
   const loadTickets = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/tickets');
+      const res = await axios.get(`${API_BASE_URL}/api/tickets`);
       const all = res.data;
       const pendingList = all.filter((t) => t.status === 'Pending');
       const pendingIds = pendingList.map((t) => t.id);
@@ -66,7 +68,7 @@ export default function TechDashboard({ user, logout }) {
         ? `${ticket.issue} [Tech Note: ${noteText}]`
         : ticket.issue;
 
-      await axios.put(`http://localhost:5000/api/tickets/${ticket.id}`, {
+      await axios.put(`${API_BASE_URL}/api/tickets/${ticket.id}`, {
         status: 'Solved',
         issue: updatedIssue
       });
